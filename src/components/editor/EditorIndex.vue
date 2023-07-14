@@ -6,7 +6,8 @@
     </div>
     <div class="input-group">
       <span class="input-group-text">Rezeptname</span>
-      <input v-model="state.rezept.name" class="form-control" placeholder="Name" @change="checkIfRezeptExists()">
+      <input v-model="rezeptName" class="form-control" placeholder="Name" @change="checkIfRezeptExists()">
+      <button v-if="state.rezept.name !== rezeptName" class="btn btn-success" type="button" @click="saveRezept"><i class="bi bi-save"></i></button>
     </div>
 
     <div v-if="state.rezept.anleitung && state.rezept.anleitung.schritte.length > 0" class="p-2">
@@ -25,7 +26,7 @@
           </h2>
           <div :id="'collapse'+schritt.nr" :class="idx===0 ? 'accordion-collapse collapse show' : 'accordion-collapse collapse'" data-bs-parent="#schrittAccordion">
             <div class="accordion-body">
-              <Schritt :schritt="schritt" :key="schritt.nr" @refresh="refresh" @save="saveRezept" @remove-material="removeMaterial"/>
+              <Schritt :schritt="schritt" :key="schritt.nr" @refresh="refresh" @save="saveRezept" @remove-produkt="removeProdukt" @remove-material="removeMaterial"/>
             </div>
           </div>
         </div>
@@ -49,10 +50,6 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" type="submit" :disabled="!state.rezept.name || exists" @click="saveRezept()">
-      Speichern
-    </button>
-
   </div>
 </template>
 
@@ -71,6 +68,7 @@ export default {
     const $route = useRoute()
     const $router = useRouter()
     const db = new PouchDB("Rezepte")
+    const rezeptName = ref(null)
     let state = reactive({
       rezept: {
         _id: "",
@@ -120,12 +118,14 @@ export default {
     async function loadRezept() {
       try {
         state.rezept = await db.get($route.params.id, {attachments: true})
+        rezeptName.value = state.rezept.name
         setBilder()
       } catch (error) {
         console.error('Error retrieving recipes:', error)
       }
     }
     async function saveRezept() {
+      state.rezept.name = rezeptName.value
       if (state.rezept._id) {
         try {
           const curRezept = await db.get(state.rezept._id)
@@ -163,6 +163,7 @@ export default {
     })
     return {
       state,
+      rezeptName,
       exists,
       fotoUploadDialogOpen,
       closeFotoUploadDialog,
@@ -179,6 +180,15 @@ export default {
           materialien: [],
           produkte: [],
         })
+      },
+      async removeProdukt(data) {
+        const curSchritt = state.rezept.anleitung.schritte.find(s => s.nr === data.schritt.nr)
+        const pIdx = curSchritt.produkte.findIndex(p => p.produktId === data.produkt)
+        if (pIdx > -1) {
+          curSchritt.produkte.splice(pIdx, 1)
+          await saveRezept()
+          await refresh()
+        }
       },
       async removeMaterial(data) {
         const curSchritt = state.rezept.anleitung.schritte.find(s => s.nr === data.schritt.nr)

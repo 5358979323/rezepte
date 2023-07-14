@@ -2,25 +2,26 @@
   <div v-if="isOpen" class="dialog-overlay">
     <div class="dialog-content">
       <h4>Produktangaben anpassen</h4>
-      <div class="p-2">
-        <div class="pb-2">
+      <div class="d-row">
+        <div class="form-floating">
+          <input readonly placeholder="Name" class="form-control" id="prodName" type="text" v-model="schrittProdukt.produktId" required>
           <label for="prodName">Name</label>
-          <input readonly placeholder="Name" class="form-control" type="text" v-model="schrittProdukt.produktId"
-                 required>
         </div>
-        <div class="pb-2">
-          <label for="prodName">Preis</label>
-          <input v-model="schrittProdukt.preis" class="form-control" type="number" placeholder="Preis in Cent">
+        <div class="form-floating">
+          <input v-model="schrittProdukt.preis" class="form-control" id="preis" placeholder="Preis in Cent">
+          <label for="preis">Preis</label>
         </div>
-        <div class="pb-2">
-          <label for="prodName">Gewicht</label>
-          <input v-model="schrittProdukt.gewicht" class="form-control" type="number"
-                 placeholder="Gewicht in Gramm">
+        <div class="form-floating">
+          <input v-model="schrittProdukt.gewicht" class="form-control" id="gewicht" placeholder="Gewicht in Gramm">
+          <label for="gewicht">Gewicht</label>
         </div>
         <div class="row">
-          <button class="col btn btn-primary" type="submit" @click="applySchritt">Übernehmen</button>
-          <button class="col btn btn-primary" @click="$emit('closeDialog')">Abbrechen</button>
+          <div class="btn-group">
+            <button class="col btn btn-success" type="submit" @click="applySchritt">Übernehmen</button>
+            <button class="col btn btn-outline-warning" @click="$emit('closeDialog')">Abbrechen</button>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -64,7 +65,7 @@ export default defineComponent({
             await updateData()
           }
         }
-    );
+    )
     async function updateData () {
       try {
         rezept = await db.get($route.params.id);
@@ -105,6 +106,7 @@ export default defineComponent({
         }
         try {
           rezept = await db.put(rezept);
+          console.debug("Rezept aktualisiert", rezept)
         } catch (error) {
           console.error('Error saving rezept:', error)
         }

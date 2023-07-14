@@ -1,6 +1,6 @@
 <template>
-  <span class="container">
-    <span class="text">{{ label }}</span><span class="icon" @click="$emit('delete')"><i class="bi bi-x"></i></span>
+  <span class="chipContainer">
+    <span class="text">{{ label }}</span><span class="icon" @click="$emit('delete')"><i class="bi bi-trash"></i></span>
   </span>
 </template>
 
@@ -29,18 +29,19 @@ export default {
 </script>
 
 <style>
-.container {
-  display: compact;
-  border: 1px solid black;
+.chipContainer {
+  background-color: bisque;
+  border: 1px solid coral;
+  border-radius: 8px;
   margin: 2px;
-  padding: 2px;
-  align-items: flex-start;
+  padding: 4px;
+
 }
 
 .icon {
   cursor: pointer;
   margin-left: 5px;
-  background-color: coral;
+  color: coral;
   border-radius: 5px;
   /* Stile für das Icon */
 }

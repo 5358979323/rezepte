@@ -63,6 +63,7 @@ export default {
     };
     const closeSchrittProduktDialog = () => {
       schrittProduktDialogOpen.value = false; // Schließt den Dialog
+      selection.value = ''
       emit('refresh')
     };
     //
