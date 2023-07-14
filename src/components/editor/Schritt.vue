@@ -13,13 +13,15 @@
         <select :value="schritt.zeit.typ" class="form-select" name="Typ" id="Gartyp">
           <option value="kochen">kochen</option>
           <option value="backen">backen</option>
+          <option value="backen">vorbereiten</option>
         </select>
       </div>
       <div>
-        Materialien: {{ schritt.materialien.map(m => m._id).join(", ") }}
+        Materialien:
+        <Chip v-for="mat of schritt.materialien.map(m => m._id)" :label="mat" @delete="removeMaterial(schritt, mat)"/>
       </div>
 
-      <MaterialSelection :schritt="schritt"/>
+      <MaterialSelection :schritt="schritt" @refresh="refresh" @save="$emit('save')"/>
 
       <div>
         Produkte: {{ schritt.produkte.map(p => p.produktId + ' (' + p.gewicht + 'g)').join(", ") }}
@@ -37,10 +39,11 @@ import PouchDB from "pouchdb-browser";
 import {useRoute} from "vue-router";
 import MaterialSelection from "./MaterialSelection.vue";
 import ProduktSelection from "./ProduktSelection.vue";
+import Chip from "@/components/Chip.vue";
 
 export default {
-  components: {ProduktSelection, MaterialSelection},
-  emits: ['refresh'],
+  components: {Chip, ProduktSelection, MaterialSelection},
+  emits: ['refresh', 'save', 'removeMaterial'],
   props: {
     schritt: {
       type: Object,
@@ -53,9 +56,17 @@ export default {
 
     })
     return {
+      save () {
+        emit('save')
+      },
       refresh () {
-
         emit('refresh')
+      },
+      removeMaterial(schritt, mat) {
+        emit('removeMaterial', {
+          schritt: schritt,
+          material: mat
+        })
       }
     }
   }

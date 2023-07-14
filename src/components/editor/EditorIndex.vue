@@ -25,7 +25,7 @@
           </h2>
           <div :id="'collapse'+schritt.nr" :class="idx===0 ? 'accordion-collapse collapse show' : 'accordion-collapse collapse'" data-bs-parent="#schrittAccordion">
             <div class="accordion-body">
-              <Schritt :schritt="schritt" :key="schritt.nr" @refresh="$emit('refresh')"/>
+              <Schritt :schritt="schritt" :key="schritt.nr" @refresh="refresh" @save="saveRezept" @remove-material="removeMaterial"/>
             </div>
           </div>
         </div>
@@ -125,6 +125,31 @@ export default {
         console.error('Error retrieving recipes:', error)
       }
     }
+    async function saveRezept() {
+      if (state.rezept._id) {
+        try {
+          const curRezept = await db.get(state.rezept._id)
+          state.rezept._rev = curRezept._rev
+        } catch (err) {
+          console.error(err)
+        }
+        try {
+          const response = await db.put(state.rezept)
+          console.log("Rezept aktualisiert", response)
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        try {
+          const response = await db.post(state.rezept)
+          console.log("Neues Rezept gespeichert", response)
+          state.rezept._id = response.id
+          await $router.push("/rezept/" + response.id)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
 
     onMounted(async () => {
 
@@ -155,31 +180,16 @@ export default {
           produkte: [],
         })
       },
-      async saveRezept() {
-        if (state.rezept._id) {
-          try {
-            const curRezept = await db.get(state.rezept._id)
-            state.rezept._rev = curRezept._rev
-          } catch (err) {
-            console.error(err)
-          }
-          try {
-            const response = await db.put(state.rezept)
-            console.log("Rezept aktualisiert", response)
-          } catch (err) {
-            console.error(err)
-          }
-        } else {
-          try {
-            const response = await db.post(state.rezept)
-            console.log("Neues Rezept gespeichert", response)
-            state.rezept._id = response.id
-            $router.push("/rezept/" + response.id)
-          } catch (err) {
-            console.error(err)
-          }
+      async removeMaterial(data) {
+        const curSchritt = state.rezept.anleitung.schritte.find(s => s.nr === data.schritt.nr)
+        const matIdx = curSchritt.materialien.findIndex(m => m._id === data.material)
+        if (matIdx > -1) {
+          curSchritt.materialien.splice(matIdx, 1)
+          await saveRezept()
+          await refresh()
         }
       },
+      saveRezept,
       async checkIfRezeptExists() {
         // if (rezept.name.length > 1) {
         //   try {

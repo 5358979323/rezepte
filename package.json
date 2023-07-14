@@ -8,6 +8,7 @@
     "@popperjs/core": "^2.11.8",
     "babel-loader": "^9.1.2",
     "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.10.5",
     "css-loader": "^6.8.1",
     "exports-loader": "^4.0.0",
     "imports-loader": "^4.0.1",
