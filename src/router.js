@@ -1,7 +1,8 @@
-import {createRouter, createWebHistory} from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Home from "./components/Home.vue";
 import RezeptListe from "./components/RezeptListe.vue";
 import EditorIndex from "./components/editor/EditorIndex.vue";
+import Album from "./components/Album.vue";
 
 const routes = [
     {
@@ -15,7 +16,13 @@ const routes = [
     {
         path: '/rezept/:id?',
         component: EditorIndex
-    }
+    },
+    {
+
+        path: "/album",
+        component: Album
+
+    },
 ]
 
 
